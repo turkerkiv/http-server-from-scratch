@@ -8,8 +8,9 @@
 int main()
 {
     char buffer[1024] = {0};
-    struct sockaddr_in address;
-    socklen_t addrlen = sizeof(address);
+    struct sockaddr_in server_address;
+    struct sockaddr_in client_address;
+    socklen_t client_address_len = sizeof(client_address);
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -19,11 +20,11 @@ int main()
     };
     printf("Socket opened with a descriptor: %d\n", sockfd);
 
-    address.sin_family = AF_INET;
-    address.sin_port = htons(PORT);
-    address.sin_addr.s_addr = INADDR_ANY;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(PORT);
+    server_address.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(sockfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    if (bind(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
     {
         perror("Failed to bind socket");
         close(sockfd);
@@ -39,7 +40,7 @@ int main()
     }
     printf("Socket listening up to 2 client\n");
 
-    int new_socketfd = accept(sockfd, (struct sockaddr *)&address, &addrlen);
+    int new_socketfd = accept(sockfd, (struct sockaddr *)&client_address, &client_address_len);
     if (new_socketfd < 0)
     {
         perror("cannot accept");
