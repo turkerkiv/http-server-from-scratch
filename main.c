@@ -1,18 +1,58 @@
-#include <sys/socket.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <sys/socket.h> // socket()
+#include <stdio.h>      // input output
+#include <stdlib.h>     // exit status code
+#include <unistd.h>     // close()
+#include <netinet/in.h> // sockaddr_in struct
+#define PORT 8080
 
 int main()
 {
+    char buffer[1024] = {0};
+    struct sockaddr_in address;
+    socklen_t addrlen = sizeof(address);
+
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
-        printf("Failed to open socket");
+        perror("Failed to open socket");
         exit(EXIT_FAILURE);
     };
+    printf("Socket opened with a descriptor: %d\n", sockfd);
 
-    printf("Socket opened with descriptor: %d\n", sockfd);
+    address.sin_family = AF_INET;
+    address.sin_port = htons(PORT);
+    address.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(sockfd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    {
+        perror("Failed to bind socket");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Socket bind successfull\n");
+
+    if (listen(sockfd, 2) < 0)
+    {
+        perror("cannot listen");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Socket listening up to 2 client\n");
+
+    int new_socketfd = accept(sockfd, (struct sockaddr *)&address, &addrlen);
+    if (new_socketfd < 0)
+    {
+        perror("cannot accept");
+        close(sockfd);
+        exit(EXIT_FAILURE);
+    }
+    printf("Socket accepted client with a new descriptor: %d\n", new_socketfd);
+
+    ssize_t valread = recv(new_socketfd, buffer, sizeof(buffer) - 1, 0);
+    printf("received: %s\n", buffer);
+
+    send(new_socketfd, "Hello", sizeof("Hello"), 0);
+    printf("sent: %s\n", "Hello");
 
     close(sockfd);
     return 0;
