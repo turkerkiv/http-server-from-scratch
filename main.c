@@ -51,6 +51,38 @@ int main()
 
     ssize_t valread = recv(new_socketfd, buffer, sizeof(buffer) - 1, 0);
     printf("received: %s\n", buffer);
+    printf("---------\n");
+    printf("---------\n");
+    printf("---------\n");
+    printf("---------\n");
+    printf("---------\n");
+
+    char lines[4][128];
+    int index = 0;
+    int line_index = 0;
+    while (!(buffer[index - 2] == '\r' && buffer[index - 1] == '\n' && buffer[index] == '\r' && buffer[index + 1] == '\n'))
+    {
+        int inner = 0;
+        while (buffer[index] != '\r')
+        {
+            lines[line_index][inner] = buffer[index];
+            inner++;
+            index++;
+        }
+        lines[line_index][inner] = '\0';
+        line_index++;
+        index += 2; // to skip \r\n
+    }
+
+    printf("---------\n");
+    printf("%s\n", lines[0]);
+    printf("---------\n");
+    printf("%s\n", lines[1]);
+    printf("---------\n");
+    printf("%s\n", lines[2]);
+    printf("---------\n");
+    printf("%s\n", lines[3]);
+    printf("---------\n");
 
     send(new_socketfd, "Hello", sizeof("Hello"), 0);
     printf("sent: %s\n", "Hello");
