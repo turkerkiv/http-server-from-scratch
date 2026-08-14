@@ -4,6 +4,7 @@
 #include <unistd.h>     // close()
 #include <netinet/in.h> // sockaddr_in struct
 #include "arraylist.h"
+#include "request.h"
 #define PORT 8080
 
 int main()
@@ -61,7 +62,7 @@ int main()
     arraylist_t *lines = new_arraylist(2);
 
     int index = 0;
-    int line_index = 0;
+    int line_char_reader_index = 0;
     while (!(buffer[index - 2] == '\r' && buffer[index - 1] == '\n' && buffer[index] == '\r' && buffer[index + 1] == '\n'))
     {
         int inner = 0;
@@ -73,7 +74,7 @@ int main()
             index++;
         }
         line[inner] = '\0';
-        line_index++;
+        line_char_reader_index++;
         index += 2; // to skip \r\n
         push(lines, line);
     }
@@ -87,6 +88,34 @@ int main()
     printf("---------\n");
     printf("%s\n", (char *)lines->data[3]);
     printf("---------\n");
+
+    request_t *request = malloc(sizeof(request_t));
+    char *line1 = (char *)lines->data[0];
+    int line_index = 0;
+    request->method = &line1[line_index];
+    int uri_captured = 0;
+    while (line1[line_index] != '\0')
+    {
+        if (uri_captured != 1 && line1[line_index] == ' ')
+        {
+            line1[line_index] = '\0';
+            line_index++;
+            request->uri = &line1[line_index];
+            uri_captured = 1;
+        }
+        else if (uri_captured == 1 && line1[line_index] == ' ')
+        {
+            line1[line_index] = '\0';
+            line_index++;
+            request->protocol_version = &line1[line_index];
+            break;
+        }
+        line_index++;
+    }
+
+    printf("%s\n", request->method);
+    printf("%s\n", request->uri);
+    printf("%s\n", request->protocol_version);
 
     send(new_socketfd, "Hello", sizeof("Hello"), 0);
     printf("sent: %s\n", "Hello");
