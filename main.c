@@ -5,6 +5,7 @@
 #include <netinet/in.h> // sockaddr_in struct
 #include "arraylist.h"
 #include "request.h"
+#include "request_header.h"
 #define PORT 8080
 
 int main()
@@ -59,7 +60,7 @@ int main()
     printf("---------\n");
     printf("---------\n");
 
-    arraylist_t *lines = new_arraylist(2);
+    arraylist_t *lines = new_arraylist(4);
 
     int index = 0;
     int line_char_reader_index = 0;
@@ -90,32 +91,57 @@ int main()
     printf("---------\n");
 
     request_t *request = malloc(sizeof(request_t));
-    char *line1 = (char *)lines->data[0];
+    char *first_line = (char *)lines->data[0];
     int line_index = 0;
-    request->method = &line1[line_index];
+    request->method = &first_line[line_index];
     int uri_captured = 0;
-    while (line1[line_index] != '\0')
+    while (first_line[line_index] != '\0')
     {
-        if (uri_captured != 1 && line1[line_index] == ' ')
+        if (uri_captured != 1 && first_line[line_index] == ' ')
         {
-            line1[line_index] = '\0';
+            first_line[line_index] = '\0';
             line_index++;
-            request->uri = &line1[line_index];
+            request->uri = &first_line[line_index];
             uri_captured = 1;
         }
-        else if (uri_captured == 1 && line1[line_index] == ' ')
+        else if (uri_captured == 1 && first_line[line_index] == ' ')
         {
-            line1[line_index] = '\0';
+            first_line[line_index] = '\0';
             line_index++;
-            request->protocol_version = &line1[line_index];
+            request->protocol_version = &first_line[line_index];
             break;
         }
         line_index++;
     }
-
     printf("%s\n", request->method);
     printf("%s\n", request->uri);
     printf("%s\n", request->protocol_version);
+
+    request->header_list = new_arraylist(4);
+    for (int i = 1; i < lines->count; i++)
+    {
+        char *line = (char *)lines->data[i];
+
+        int header_line_index = 0;
+        request_header_t *request_header = malloc(sizeof(request_header_t));
+        request_header->key = &line[header_line_index];
+        while (line[header_line_index] != '\0')
+        {
+            if (line[header_line_index] == ':' && line[header_line_index + 1] == ' ')
+            {
+                line[header_line_index] = '\0';
+                header_line_index += 2;
+                request_header->value = &line[header_line_index];
+                break;
+            }
+            header_line_index++;
+        }
+        push(request->header_list, request_header);
+        printf("%s\n", request_header->key);
+        printf("%s\n", request_header->value);
+    }
+
+    // need to free lines() but not the values inside? or maybe use inside of it directly
 
     send(new_socketfd, "Hello", sizeof("Hello"), 0);
     printf("sent: %s\n", "Hello");

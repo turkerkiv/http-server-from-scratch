@@ -3,5 +3,5 @@ typedef struct Request
     char *method;
     char *uri;
     char *protocol_version;
-    // headers arraylist
+    arraylist_t *header_list;
 } request_t;
