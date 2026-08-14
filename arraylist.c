@@ -58,3 +58,17 @@ void remove_at_index(arraylist_t *arraylist, int index)
     arraylist->data[arraylist->count - 1] = NULL;
     arraylist->count--;
 }
+
+void free_arraylist(arraylist_t *arraylist)
+{
+    if (arraylist == NULL)
+        return;
+
+    for (int i = 0; i < arraylist->count; i++)
+    {
+        free(arraylist->data[i]);
+    }
+
+    free(arraylist->data);
+    free(arraylist);
+}
