@@ -142,6 +142,7 @@ int main()
     }
 
     // need to free lines() but not the values inside? or maybe use inside of it directly
+    free(lines);
 
     send(new_socketfd, "Hello", sizeof("Hello"), 0);
     printf("sent: %s\n", "Hello");
