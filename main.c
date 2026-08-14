@@ -3,6 +3,7 @@
 #include <stdlib.h>     // exit status code
 #include <unistd.h>     // close()
 #include <netinet/in.h> // sockaddr_in struct
+#include "arraylist.h"
 #define PORT 8080
 
 int main()
@@ -57,31 +58,34 @@ int main()
     printf("---------\n");
     printf("---------\n");
 
-    char lines[4][128];
+    arraylist_t *lines = new_arraylist(2);
+
     int index = 0;
     int line_index = 0;
     while (!(buffer[index - 2] == '\r' && buffer[index - 1] == '\n' && buffer[index] == '\r' && buffer[index + 1] == '\n'))
     {
         int inner = 0;
+        char *line = malloc(1024 * sizeof(char));
         while (buffer[index] != '\r')
         {
-            lines[line_index][inner] = buffer[index];
+            line[inner] = buffer[index];
             inner++;
             index++;
         }
-        lines[line_index][inner] = '\0';
+        line[inner] = '\0';
         line_index++;
         index += 2; // to skip \r\n
+        push(lines, line);
     }
 
     printf("---------\n");
-    printf("%s\n", lines[0]);
+    printf("%s\n", (char *)lines->data[0]);
     printf("---------\n");
-    printf("%s\n", lines[1]);
+    printf("%s\n", (char *)lines->data[1]);
     printf("---------\n");
-    printf("%s\n", lines[2]);
+    printf("%s\n", (char *)lines->data[2]);
     printf("---------\n");
-    printf("%s\n", lines[3]);
+    printf("%s\n", (char *)lines->data[3]);
     printf("---------\n");
 
     send(new_socketfd, "Hello", sizeof("Hello"), 0);

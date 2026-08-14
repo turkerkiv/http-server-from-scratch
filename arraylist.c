@@ -1,4 +1,4 @@
-#include <arraylist.h>
+#include "arraylist.h"
 #include <stdlib.h>
 
 arraylist_t *new_arraylist(int capacity)
@@ -24,7 +24,7 @@ void push(arraylist_t *arraylist, void *item)
     if (arraylist->capacity == arraylist->count)
     {
         arraylist->capacity *= 2;
-        void **reallocated = realloc(arraylist, arraylist->capacity);
+        void **reallocated = realloc(arraylist->data, arraylist->capacity * sizeof(void *));
         if (reallocated == NULL)
         {
             arraylist->capacity /= 2;
@@ -48,7 +48,7 @@ void *get_at_index(arraylist_t *arraylist, int index)
 void remove_at_index(arraylist_t *arraylist, int index)
 {
     if (index >= arraylist->count || index < 0)
-        return NULL;
+        return;
 
     for (int i = index; i < arraylist->count - 1; i++)
     {
