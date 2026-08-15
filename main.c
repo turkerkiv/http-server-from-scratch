@@ -144,8 +144,7 @@ int main()
     // need to free lines() but not the values inside? or maybe use inside of it directly
     free(lines);
 
-    send(new_socketfd, "Hello", sizeof("Hello"), 0);
-    printf("sent: %s\n", "Hello");
+    send(new_socketfd, "HTTP/1.1 200 OK\r\n", sizeof("HTTP/1.1 200 OK\r\n"), 0);
 
     close(sockfd);
     return 0;
