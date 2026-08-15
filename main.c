@@ -6,6 +6,8 @@
 #include "arraylist.h"
 #include "request.h"
 #include "request_header.h"
+#include "response.h"
+#include <string.h>
 #define PORT 8080
 
 int main()
@@ -152,8 +154,14 @@ int main()
 
     // need to free lines() but not the values inside? or maybe use inside of it directly
     free(lines);
+    response_t response;
+    strcpy(response.protocol_version, "HTTP/1.1");
+    strcpy(response.status_desc, "OK");
+    strcpy(response.status_code, "200");
 
-    send(new_socketfd, "HTTP/1.1 200 OK\r\n", sizeof("HTTP/1.1 200 OK\r\n"), 0);
+    char result_str[1024];
+    snprintf(result_str, sizeof(result_str), "%s %s %s\r\n", response.protocol_version, response.status_code, response.status_desc);
+    send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
     return 0;
