@@ -23,6 +23,15 @@ int main()
     };
     printf("Socket opened with a descriptor: %d\n", sockfd);
 
+    int opt = 1;
+    if (setsockopt(sockfd, SOL_SOCKET,
+                   SO_REUSEADDR, &opt,
+                   sizeof(opt)))
+    {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
     server_address.sin_addr.s_addr = INADDR_ANY;
