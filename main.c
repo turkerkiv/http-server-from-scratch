@@ -154,13 +154,26 @@ int main()
 
     // need to free lines() but not the values inside? or maybe use inside of it directly
     free(lines);
+
+    // response part
+    // istek türüne göre getlerde eğer uri / veya .html ile bitiyorsa content type text/html oluyor bunda ve plain ise charset de eklenecek. yoksa json istiyordur. ya da bunun yolu accept headerına bakmaktır. bi de tabii status durumları da error alıp almamaya göre değişecek. sonra body yine istenilen şeye göre değişecek. şimdilik bunlar dinamik işte.
+
     response_t response;
     strcpy(response.protocol_version, "HTTP/1.1");
     strcpy(response.status_desc, "OK");
     strcpy(response.status_code, "200");
+    strcpy(response.content_type, "text/html; charset=UTF-8");
+    strcpy(response.body, "<html><body><h1>Hello, World!</h1></body></html>");
+    int body_len = strlen(response.body);
 
-    char result_str[1024];
-    snprintf(result_str, sizeof(result_str), "%s %s %s\r\n", response.protocol_version, response.status_code, response.status_desc);
+    char result_str[4096];
+    snprintf(result_str, sizeof(result_str), "%s %s %s\r\n"
+                                             "Content-Type: %s\r\n"
+                                             "Content-Length: %d\r\n"
+                                             "Connection: Close\r\n"
+                                             "\r\n"
+                                             "%s",
+             response.protocol_version, response.status_code, response.status_desc, response.content_type, body_len, response.body);
     send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
