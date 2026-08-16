@@ -12,4 +12,6 @@ typedef struct Route
     void (*handler_func)(response_t *response);
 } route_t;
 
+router_t *new_router();
 void add_route(router_t *router, route_t *route);
+void handle_route(router_t *router, response_t *response, char *uri);

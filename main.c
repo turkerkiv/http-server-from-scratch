@@ -9,9 +9,6 @@
 #include "response.h"
 #include <string.h>
 #include "router.h"
-#include "controller/home_controller.c"
-#include "controller/error_controller.c"
-#include "controller/user_controller.c"
 
 #define PORT 8080
 
@@ -21,24 +18,7 @@ int main()
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
     socklen_t client_address_len = sizeof(client_address);
-
-    route_t *route = malloc(sizeof(route_t));
-    route->route_name = "/users";
-    route->handler_func = &handle_get_users;
-
-    route_t *route3 = malloc(sizeof(route_t));
-    route3->route_name = "/user";
-    route3->handler_func = &handle_get_user;
-
-    route_t *route2 = malloc(sizeof(route_t));
-    route2->route_name = "/";
-    route2->handler_func = &handle_index;
-
-    router_t *router = malloc(sizeof(router_t));
-    router->routes = new_arraylist(4);
-    add_route(router, route);
-    add_route(router, route2);
-    add_route(router, route3);
+    router_t *router = new_router();
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -182,22 +162,7 @@ int main()
     // istek türüne göre getlerde eğer uri / veya .html ile bitiyorsa content type text/html oluyor bunda ve plain ise charset de eklenecek. yoksa json istiyordur. ya da bunun yolu accept headerına bakmaktır. bi de tabii status durumları da error alıp almamaya göre değişecek. sonra body yine istenilen şeye göre değişecek. şimdilik bunlar dinamik işte.
 
     response_t response;
-    int route_found = 0;
-    for (int i = 0; i < router->routes->count; i++)
-    {
-        route_t *route = (route_t *)router->routes->data[i];
-        if (strcmp(route->route_name, request->uri) == 0)
-        {
-            route->handler_func(&response);
-            route_found = 1;
-            break;
-        }
-    }
-
-    if (route_found == 0)
-    {
-        handle_not_found(&response);
-    }
+    handle_route(router, &response, request->uri);
 
     char result_str[4096];
     serialize(&response, result_str, sizeof(result_str));
