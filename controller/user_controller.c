@@ -1,7 +1,8 @@
 #include "../response.h"
+#include "../request.h"
 #include <string.h>
 
-void handle_get_users(response_t *response)
+void handle_get_users(request_t *request, response_t *response)
 {
     strcpy(response->protocol_version, "HTTP/1.1");
     strcpy(response->status_desc, "OK");
@@ -10,7 +11,7 @@ void handle_get_users(response_t *response)
     strcpy(response->body, "<html><body><h1>Hello, World!</h1></body></html>");
 }
 
-void handle_get_user(response_t *response)
+void handle_get_user(request_t *request, response_t *response)
 {
     strcpy(response->protocol_version, "HTTP/1.1");
     strcpy(response->status_desc, "OK");

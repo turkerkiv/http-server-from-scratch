@@ -1,10 +1,11 @@
 #include "router.h"
 #include "arraylist.h"
-#include "controller/home_controller.c"
 #include "controller/error_controller.c"
+#include "controller/home_controller.c"
 #include "controller/user_controller.c"
 #include <stdlib.h>
 #include <string.h>
+#include "request.h"
 
 router_t *new_router()
 {
@@ -33,15 +34,18 @@ router_t *new_router()
     return router;
 }
 
-void handle_route(router_t *router, response_t *response, char *uri)
+void handle_route(router_t *router, request_t *request, response_t *response, char *uri)
 {
     int route_found = 0;
     for (int i = 0; i < router->routes_dispatch_table->count; i++)
     {
         route_t *route = (route_t *)router->routes_dispatch_table->data[i];
+        // need one more check according to extension.
+        // istek türüne göre getlerde eğer uri / veya .html ile bitiyorsa content type text/html oluyor bunda ve plain ise charset de eklenecek. yoksa json istiyordur. ya da bunun yolu accept headerına bakmaktır. bi de tabii status durumları da error alıp almamaya göre değişecek. sonra body yine istenilen şeye göre değişecek. şimdilik bunlar dinamik işte.
+
         if (strcmp(route->route_name, uri) == 0)
         {
-            route->handler_func(response);
+            route->handler_func(request, response);
             route_found = 1;
             break;
         }
@@ -49,7 +53,7 @@ void handle_route(router_t *router, response_t *response, char *uri)
 
     if (route_found == 0)
     {
-        handle_not_found(response);
+        handle_not_found(request, response);
     }
 }
 

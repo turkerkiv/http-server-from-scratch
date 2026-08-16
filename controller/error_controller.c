@@ -1,7 +1,8 @@
 #include "../response.h"
+#include "../request.h"
 #include <string.h>
 
-void handle_not_found(response_t *response)
+void handle_not_found(request_t *request, response_t *response)
 {
     strcpy(response->protocol_version, "HTTP/1.1");
     strcpy(response->status_desc, "Not found");

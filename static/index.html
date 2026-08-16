@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>My Example Web Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #34495e;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #1abc9c;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1,
+        h2 {
+            color: #2c3e50;
+        }
+
+        button {
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        button:hover {
+            background-color: #16a085;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Welcome to My Website</h1>
+    </header>
+    <nav><a href="#">Home</a><a href="#">About</a><a href="#">Services</a><a href="#">Contact</a></nav>
+    <div class="container">
+        <h2>About This Page</h2>
+        <p>This is a standard HTML5 document structured using modern semantic tags. It includes integrated CSS rules to
+            provide clean typography,a responsive layout,and custom hover elements.</p>
+        <h2>Key Features Included:</h2>
+        <ul>
+            <li><strong>Responsive Meta Tag:</strong> Automatically adapts layout to fit mobile phones,tablets,or
+                desktop viewports.</li>
+            <li><strong>Semantic Structure:</strong> Utilizes strict
+                <code>&lt;header&gt;</code>,<code>&lt;nav&gt;</code>,and <code>&lt;footer&gt;</code> wrappers.</li>
+            <li><strong>Interactive JavaScript:</strong> Contains a functional button callback directly below.</li>
+        </ul>
+        <h2>Interactive Demo</h2>
+        <p>Click the action button below to trigger a standard client-side browser alert window.</p><button
+            id="alertBtn">Click Me!</button>
+    </div>
+    <footer>
+        <p>&copy;2026 My Example Document. All rights reserved.</p>
+    </footer>
+    <script>document.getElementById('alertBtn').addEventListener('click', function () { alert('Hello! The JavaScript function execution works perfectly.'); });</script>
+</body>
+
+</html>

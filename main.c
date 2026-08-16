@@ -159,15 +159,14 @@ int main()
     free(lines);
 
     // response part
-    // istek türüne göre getlerde eğer uri / veya .html ile bitiyorsa content type text/html oluyor bunda ve plain ise charset de eklenecek. yoksa json istiyordur. ya da bunun yolu accept headerına bakmaktır. bi de tabii status durumları da error alıp almamaya göre değişecek. sonra body yine istenilen şeye göre değişecek. şimdilik bunlar dinamik işte.
-
     response_t response;
-    handle_route(router, &response, request->uri);
+    handle_route(router, request, &response, request->uri);
 
     char result_str[4096];
     serialize(&response, result_str, sizeof(result_str));
     send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
-    return 0;
+
+        return 0;
 }
