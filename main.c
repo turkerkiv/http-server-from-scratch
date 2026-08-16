@@ -9,25 +9,11 @@
 #include "response.h"
 #include <string.h>
 #include "router.h"
+#include "controller/home_controller.c"
+#include "controller/error_controller.c"
+#include "controller/user_controller.c"
+
 #define PORT 8080
-
-void test_404(response_t *response)
-{
-    strcpy(response->protocol_version, "HTTP/1.1");
-    strcpy(response->status_desc, "Not found");
-    strcpy(response->status_code, "404");
-    strcpy(response->content_type, "text/html; charset=UTF-8");
-    strcpy(response->body, "<html><body><h1>No route found</h1></body></html>");
-}
-
-void test_200(response_t *response)
-{
-    strcpy(response->protocol_version, "HTTP/1.1");
-    strcpy(response->status_desc, "OK");
-    strcpy(response->status_code, "200");
-    strcpy(response->content_type, "text/html; charset=UTF-8");
-    strcpy(response->body, "<html><body><h1>Hello, World!</h1></body></html>");
-}
 
 int main()
 {
@@ -37,17 +23,22 @@ int main()
     socklen_t client_address_len = sizeof(client_address);
 
     route_t *route = malloc(sizeof(route_t));
-    route->route_name = "/hello";
-    route->function_name = &test_200;
+    route->route_name = "/users";
+    route->handler_func = &handle_get_users;
+
+    route_t *route3 = malloc(sizeof(route_t));
+    route3->route_name = "/user";
+    route3->handler_func = &handle_get_user;
 
     route_t *route2 = malloc(sizeof(route_t));
     route2->route_name = "/";
-    route2->function_name = &test_200;
+    route2->handler_func = &handle_index;
 
     router_t *router = malloc(sizeof(router_t));
     router->routes = new_arraylist(4);
     add_route(router, route);
     add_route(router, route2);
+    add_route(router, route3);
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -197,21 +188,18 @@ int main()
         route_t *route = (route_t *)router->routes->data[i];
         if (strcmp(route->route_name, request->uri) == 0)
         {
-            route->function_name(&response);
+            route->handler_func(&response);
             route_found = 1;
             break;
         }
     }
 
-    char result_str[4096];
     if (route_found == 0)
     {
-        test_404(&response);
+        handle_not_found(&response);
     }
-    // else
-    // {
-    //     test_200(&response);
-    // }
+
+    char result_str[4096];
     serialize(&response, result_str, sizeof(result_str));
     send(new_socketfd, result_str, strlen(result_str), 0);
 
