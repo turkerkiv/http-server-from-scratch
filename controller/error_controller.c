@@ -1,4 +1,5 @@
 #include "../response.h"
+#include <string.h>
 
 void handle_not_found(response_t *response)
 {

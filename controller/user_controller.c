@@ -1,4 +1,5 @@
 #include "../response.h"
+#include <string.h>
 
 void handle_get_users(response_t *response)
 {
