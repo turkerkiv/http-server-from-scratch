@@ -6,3 +6,5 @@ typedef struct Response
     char content_type[32];
     char body[2048];
 } response_t;
+
+void serialize(response_t *response, char *result_str, size_t result_size);

@@ -167,13 +167,7 @@ int main()
     int body_len = strlen(response.body);
 
     char result_str[4096];
-    snprintf(result_str, sizeof(result_str), "%s %s %s\r\n"
-                                             "Content-Type: %s\r\n"
-                                             "Content-Length: %d\r\n"
-                                             "Connection: Close\r\n"
-                                             "\r\n"
-                                             "%s",
-             response.protocol_version, response.status_code, response.status_desc, response.content_type, body_len, response.body);
+    serialize(&response, result_str, sizeof(result_str));
     send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
