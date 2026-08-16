@@ -11,6 +11,24 @@
 #include "router.h"
 #define PORT 8080
 
+void test_404(response_t *response)
+{
+    strcpy(response->protocol_version, "HTTP/1.1");
+    strcpy(response->status_desc, "Not found");
+    strcpy(response->status_code, "404");
+    strcpy(response->content_type, "text/html; charset=UTF-8");
+    strcpy(response->body, "<html><body><h1>No route found</h1></body></html>");
+}
+
+void test_200(response_t *response)
+{
+    strcpy(response->protocol_version, "HTTP/1.1");
+    strcpy(response->status_desc, "OK");
+    strcpy(response->status_code, "200");
+    strcpy(response->content_type, "text/html; charset=UTF-8");
+    strcpy(response->body, "<html><body><h1>Hello, World!</h1></body></html>");
+}
+
 int main()
 {
     char buffer[1024] = {0};
@@ -20,11 +38,11 @@ int main()
 
     route_t *route = malloc(sizeof(route_t));
     route->route_name = "/hello";
-    route->function_name = "hello_function";
+    route->function_name = &test_200;
 
     route_t *route2 = malloc(sizeof(route_t));
     route2->route_name = "/";
-    route2->function_name = "root_function";
+    route2->function_name = &test_200;
 
     router_t *router = malloc(sizeof(router_t));
     router->routes = new_arraylist(4);
@@ -172,45 +190,30 @@ int main()
     // response part
     // istek türüne göre getlerde eğer uri / veya .html ile bitiyorsa content type text/html oluyor bunda ve plain ise charset de eklenecek. yoksa json istiyordur. ya da bunun yolu accept headerına bakmaktır. bi de tabii status durumları da error alıp almamaya göre değişecek. sonra body yine istenilen şeye göre değişecek. şimdilik bunlar dinamik işte.
 
+    response_t response;
     int route_found = 0;
     for (int i = 0; i < router->routes->count; i++)
     {
         route_t *route = (route_t *)router->routes->data[i];
         if (strcmp(route->route_name, request->uri) == 0)
         {
-            // route->function_name;
+            route->function_name(&response);
             route_found = 1;
+            break;
         }
     }
 
+    char result_str[4096];
     if (route_found == 0)
     {
-        response_t response;
-        strcpy(response.protocol_version, "HTTP/1.1");
-        strcpy(response.status_desc, "Not found");
-        strcpy(response.status_code, "404");
-        strcpy(response.content_type, "text/html; charset=UTF-8");
-        strcpy(response.body, "<html><body><h1>No route found</h1></body></html>");
-        int body_len = strlen(response.body);
-
-        char result_str[4096];
-        serialize(&response, result_str, sizeof(result_str));
-        send(new_socketfd, result_str, strlen(result_str), 0);
+        test_404(&response);
     }
-    else
-    {
-        response_t response;
-        strcpy(response.protocol_version, "HTTP/1.1");
-        strcpy(response.status_desc, "OK");
-        strcpy(response.status_code, "200");
-        strcpy(response.content_type, "text/html; charset=UTF-8");
-        strcpy(response.body, "<html><body><h1>Hello, World!</h1></body></html>");
-        int body_len = strlen(response.body);
-
-        char result_str[4096];
-        serialize(&response, result_str, sizeof(result_str));
-        send(new_socketfd, result_str, strlen(result_str), 0);
-    }
+    // else
+    // {
+    //     test_200(&response);
+    // }
+    serialize(&response, result_str, sizeof(result_str));
+    send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
     return 0;
