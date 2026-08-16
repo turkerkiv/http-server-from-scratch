@@ -3,7 +3,7 @@
 
 typedef struct Router
 {
-    arraylist_t *routes;
+    arraylist_t *routes_dispatch_table;
 } router_t;
 
 typedef struct Route

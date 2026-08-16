@@ -25,7 +25,7 @@ router_t *new_router()
     route4->handler_func = &handle_api_hello;
 
     router_t *router = malloc(sizeof(router_t));
-    router->routes = new_arraylist(4);
+    router->routes_dispatch_table = new_arraylist(4);
     add_route(router, route);
     add_route(router, route2);
     add_route(router, route3);
@@ -36,9 +36,9 @@ router_t *new_router()
 void handle_route(router_t *router, response_t *response, char *uri)
 {
     int route_found = 0;
-    for (int i = 0; i < router->routes->count; i++)
+    for (int i = 0; i < router->routes_dispatch_table->count; i++)
     {
-        route_t *route = (route_t *)router->routes->data[i];
+        route_t *route = (route_t *)router->routes_dispatch_table->data[i];
         if (strcmp(route->route_name, uri) == 0)
         {
             route->handler_func(response);
@@ -55,5 +55,5 @@ void handle_route(router_t *router, response_t *response, char *uri)
 
 void add_route(router_t *router, route_t *route)
 {
-    push(router->routes, route);
+    push(router->routes_dispatch_table, route);
 }
