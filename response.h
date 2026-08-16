@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 typedef struct Response
 {
     char protocol_version[16];
