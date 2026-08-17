@@ -8,5 +8,5 @@ void handle_not_found(request_t *request, response_t *response)
     strcpy(response->status_desc, "Not found");
     strcpy(response->status_code, "404");
     strcpy(response->content_type, "text/html; charset=UTF-8");
-    strcpy(response->body, "<html><body><h1>No route found</h1></body></html>");
+    strcpy(response->body, "<html><body><h1>Not found</h1></body></html>");
 }

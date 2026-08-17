@@ -62,6 +62,7 @@ request_t *parse_to_request(char *request_str)
         printf("VALUE%d: %s\n", i, request_header->value);
     }
 
+    // free lines but not data inside because they are still being used
     free(lines);
     return new_request;
 }

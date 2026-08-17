@@ -55,33 +55,53 @@ int main()
     }
     printf("Socket listening up to 2 client\n");
 
-    int new_socketfd = accept(sockfd, (struct sockaddr *)&client_address, &client_address_len);
-    if (new_socketfd < 0)
+    while (1)
     {
-        perror("cannot accept");
-        close(sockfd);
-        exit(EXIT_FAILURE);
+        int new_socketfd = accept(sockfd, (struct sockaddr *)&client_address, &client_address_len);
+        if (new_socketfd < 0)
+        {
+            perror("cannot accept");
+            close(sockfd);
+            exit(EXIT_FAILURE);
+        }
+        printf("Socket accepted client with a new descriptor: %d\n", new_socketfd);
+
+        // request
+        char request_buffer[1024] = {0};
+        ssize_t valread = recv(new_socketfd, request_buffer, sizeof(request_buffer) - 1, 0);
+        request_t *request = parse_to_request(request_buffer);
+
+        // response
+        response_t response;
+
+        // router + response filling
+        router_t *router = new_router();
+        handle_route(router, request, &response, request->uri);
+
+        // sender
+        char result_str[4096];
+        serialize_response(&response, result_str, sizeof(result_str));
+        send(new_socketfd, result_str, strlen(result_str), 0);
+
+        // when each request finishes
+        for (int i = 0; i < request->header_list->count; i++)
+        {
+            free(request->header_list->data[i]);
+        }
+        free(request->header_list);
+        free(request);
+
+        close(new_socketfd);
     }
-    printf("Socket accepted client with a new descriptor: %d\n", new_socketfd);
 
-    // request
-    char request_buffer[1024] = {0};
-    ssize_t valread = recv(new_socketfd, request_buffer, sizeof(request_buffer) - 1, 0);
-    request_t *request = parse_to_request(request_buffer);
-
-    // response part
-    response_t response;
-
-    // router
-    router_t *router = new_router();
-    handle_route(router, request, &response, request->uri);
-
-    // response
-    char result_str[4096];
-    serialize_response(&response, result_str, sizeof(result_str));
-    send(new_socketfd, result_str, strlen(result_str), 0);
+    // when closing app but dont need to
+    // for (int i = 0; i < router->routes_dispatch_table->count; i++)
+    // {
+    //     free(router->routes_dispatch_table->data[i]);
+    // }
+    // free(router->routes_dispatch_table);
+    // free(router);
 
     close(sockfd);
-
     return 0;
 }
