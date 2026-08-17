@@ -5,3 +5,6 @@ typedef struct Request
     char *protocol_version;
     arraylist_t *header_list;
 } request_t;
+
+request_t *parse_to_request(char *request_str);
+arraylist_t *break_into_lines(char *request_str);

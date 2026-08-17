@@ -14,11 +14,9 @@
 
 int main()
 {
-    char buffer[1024] = {0};
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
     socklen_t client_address_len = sizeof(client_address);
-    router_t *router = new_router();
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -66,107 +64,24 @@ int main()
     }
     printf("Socket accepted client with a new descriptor: %d\n", new_socketfd);
 
-    ssize_t valread = recv(new_socketfd, buffer, sizeof(buffer) - 1, 0);
-    printf("received: %s\n", buffer);
-    printf("---------\n");
-    printf("---------\n");
-    printf("---------\n");
-    printf("---------\n");
-    printf("---------\n");
-
-    arraylist_t *lines = new_arraylist(4);
-
-    int index = 0;
-    int line_char_reader_index = 0;
-    while (!(buffer[index - 2] == '\r' && buffer[index - 1] == '\n' && buffer[index] == '\r' && buffer[index + 1] == '\n'))
-    {
-        int inner = 0;
-        char *line = malloc(1024 * sizeof(char));
-        while (buffer[index] != '\r')
-        {
-            line[inner] = buffer[index];
-            inner++;
-            index++;
-        }
-        line[inner] = '\0';
-        line_char_reader_index++;
-        index += 2; // to skip \r\n
-        push(lines, line);
-    }
-
-    printf("---------\n");
-    printf("%s\n", (char *)lines->data[0]);
-    printf("---------\n");
-    printf("%s\n", (char *)lines->data[1]);
-    printf("---------\n");
-    printf("%s\n", (char *)lines->data[2]);
-    printf("---------\n");
-    printf("%s\n", (char *)lines->data[3]);
-    printf("---------\n");
-
-    request_t *request = malloc(sizeof(request_t));
-    char *first_line = (char *)lines->data[0];
-    int line_index = 0;
-    request->method = &first_line[line_index];
-    int uri_captured = 0;
-    while (first_line[line_index] != '\0')
-    {
-        if (uri_captured != 1 && first_line[line_index] == ' ')
-        {
-            first_line[line_index] = '\0';
-            line_index++;
-            request->uri = &first_line[line_index];
-            uri_captured = 1;
-        }
-        else if (uri_captured == 1 && first_line[line_index] == ' ')
-        {
-            first_line[line_index] = '\0';
-            line_index++;
-            request->protocol_version = &first_line[line_index];
-            break;
-        }
-        line_index++;
-    }
-    printf("%s\n", request->method);
-    printf("%s\n", request->uri);
-    printf("%s\n", request->protocol_version);
-
-    request->header_list = new_arraylist(4);
-    for (int i = 1; i < lines->count; i++)
-    {
-        char *line = (char *)lines->data[i];
-
-        int header_line_index = 0;
-        request_header_t *request_header = malloc(sizeof(request_header_t));
-        request_header->key = &line[header_line_index];
-        while (line[header_line_index] != '\0')
-        {
-            if (line[header_line_index] == ':' && line[header_line_index + 1] == ' ')
-            {
-                line[header_line_index] = '\0';
-                header_line_index += 2;
-                request_header->value = &line[header_line_index];
-                break;
-            }
-            header_line_index++;
-        }
-        push(request->header_list, request_header);
-        printf("%s\n", request_header->key);
-        printf("%s\n", request_header->value);
-    }
-
-    // need to free lines() but not the values inside? or maybe use inside of it directly
-    free(lines);
+    // request
+    char request_buffer[1024] = {0};
+    ssize_t valread = recv(new_socketfd, request_buffer, sizeof(request_buffer) - 1, 0);
+    request_t *request = parse_to_request(request_buffer);
 
     // response part
     response_t response;
+
+    // router
+    router_t *router = new_router();
     handle_route(router, request, &response, request->uri);
 
+    // response
     char result_str[4096];
-    serialize(&response, result_str, sizeof(result_str));
+    serialize_response(&response, result_str, sizeof(result_str));
     send(new_socketfd, result_str, strlen(result_str), 0);
 
     close(sockfd);
 
-        return 0;
+    return 0;
 }

@@ -9,4 +9,4 @@ typedef struct Response
     char body[2048];
 } response_t;
 
-void serialize(response_t *response, char *result_str, size_t result_size);
+void serialize_response(response_t *response, char *result_str, size_t result_size);

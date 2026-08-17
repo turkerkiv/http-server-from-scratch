@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdio.h>
 
-void serialize(response_t *response, char *result_str, size_t result_size)
+void serialize_response(response_t *response, char *result_str, size_t result_size)
 {
     int body_len = strlen(response->body);
     snprintf(result_str, result_size, "%s %s %s\r\n"
