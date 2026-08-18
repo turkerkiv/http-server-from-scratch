@@ -67,6 +67,7 @@ request_t *parse_to_request(char *request_str)
 
     // extract headers
     new_request->header_list = new_arraylist(4);
+    // start from 1 because 0 is request line and end at count - 1 because last line is body
     for (int i = 1; i < lines->count - 1; i++)
     {
         char *header_line = (char *)lines->data[i];
@@ -159,7 +160,7 @@ arraylist_t *break_into_lines(char *request_str)
     while (!(request_str[global_index - 2] == '\r' && request_str[global_index - 1] == '\n' && request_str[global_index] == '\r' && request_str[global_index + 1] == '\n'))
     {
         int line_index = 0;
-        char *line = malloc(1024 * sizeof(char));
+        char *line = malloc(2048 * sizeof(char));
         while (request_str[global_index] != '\r')
         {
             line[line_index] = request_str[global_index];
@@ -172,7 +173,7 @@ arraylist_t *break_into_lines(char *request_str)
     }
 
     global_index += 2; // to skip \r\n\r\n
-    char *body = malloc(1024 * sizeof(char));
+    char *body = malloc(4096 * sizeof(char));
     body = &request_str[global_index];
     push(lines, body);
 

@@ -23,7 +23,7 @@ void *client_func(void *thread_dto)
     free(thread_dto);
 
     // request
-    char request_buffer[1024] = {0};
+    char request_buffer[8192] = {0};
     ssize_t valread = recv(client_fd, request_buffer, sizeof(request_buffer) - 1, 0);
     request_t *request = parse_to_request(request_buffer);
 
@@ -34,7 +34,7 @@ void *client_func(void *thread_dto)
     handle_route(router, request, &response);
 
     // sender
-    char result_str[4096];
+    char result_str[8192];
     serialize_response(&response, result_str, sizeof(result_str));
     send(client_fd, result_str, strlen(result_str), 0);
 
