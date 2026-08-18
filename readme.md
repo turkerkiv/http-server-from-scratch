@@ -1,4 +1,4 @@
-# http1.1 server in C
+# HTTP1.1 server in C
 
 ## What is this project about?
 HTTP server that listens and accepts 1.1 version messages, parses them into request struct, gives it to router, finds match for provided URI and method in routes dispatch table, calls found route's handler function and gets response struct. When there is no match, returns 404. It can work asynchronously for multiple clients thanks to threads.
