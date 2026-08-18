@@ -9,8 +9,43 @@
 #include "response.h"
 #include <string.h>
 #include "router.h"
+#include <pthread.h>
 
 #define PORT 8080
+
+// create expects void * function
+void *client_func(void *client_socket_ptr)
+{
+    int client_fd = *((int *)client_socket_ptr);
+    free(client_socket_ptr);
+
+    // request
+    char request_buffer[1024] = {0};
+    ssize_t valread = recv(client_fd, request_buffer, sizeof(request_buffer) - 1, 0);
+    request_t *request = parse_to_request(request_buffer);
+
+    // response
+    response_t response;
+
+    // router + response filling
+    router_t *router = new_router();
+    handle_route(router, request, &response, request->uri);
+
+    // sender
+    char result_str[4096];
+    serialize_response(&response, result_str, sizeof(result_str));
+    send(client_fd, result_str, strlen(result_str), 0);
+
+    // when each request finishes
+    for (int i = 0; i < request->header_list->count; i++)
+    {
+        free(request->header_list->data[i]);
+    }
+    free(request->header_list);
+    free(request);
+
+    close(client_fd);
+}
 
 int main()
 {
@@ -66,32 +101,22 @@ int main()
         }
         printf("Socket accepted client with a new descriptor: %d\n", new_socketfd);
 
-        // request
-        char request_buffer[1024] = {0};
-        ssize_t valread = recv(new_socketfd, request_buffer, sizeof(request_buffer) - 1, 0);
-        request_t *request = parse_to_request(request_buffer);
+        // create thread for async processes
+        // (other alternatives are fork() and select())
 
-        // response
-        response_t response;
-
-        // router + response filling
-        router_t *router = new_router();
-        handle_route(router, request, &response, request->uri);
-
-        // sender
-        char result_str[4096];
-        serialize_response(&response, result_str, sizeof(result_str));
-        send(new_socketfd, result_str, strlen(result_str), 0);
-
-        // when each request finishes
-        for (int i = 0; i < request->header_list->count; i++)
+        // malloc to get space because new_socketfd will become dangling in the next loop or compiler mallocs same space because of optimizing and race condition happens. (alternative is copy address and use it as void pointer)
+        int *new_clientfd = malloc(sizeof(int));
+        *new_clientfd = new_socketfd;
+        pthread_t thread_id;
+        if (pthread_create(&thread_id, NULL, client_func, (void *)new_clientfd) < 0)
         {
-            free(request->header_list->data[i]);
+            perror("thread could not create");
+            free(new_clientfd);
+            close(new_socketfd);
+            continue;
         }
-        free(request->header_list);
-        free(request);
 
-        close(new_socketfd);
+        pthread_detach(thread_id);
     }
 
     // when closing app but dont need to
