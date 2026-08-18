@@ -10,14 +10,17 @@
 #include <string.h>
 #include "router.h"
 #include <pthread.h>
+#include "thread_dto.h"
 
 #define PORT 8080
 
 // create expects void * function
-void *client_func(void *client_socket_ptr)
+void *client_func(void *thread_dto)
 {
-    int client_fd = *((int *)client_socket_ptr);
-    free(client_socket_ptr);
+    thread_dto_t *dto = (thread_dto_t *)thread_dto;
+    int client_fd = dto->socketfd;
+    router_t *router = dto->router;
+    free(thread_dto);
 
     // request
     char request_buffer[1024] = {0};
@@ -28,7 +31,6 @@ void *client_func(void *client_socket_ptr)
     response_t response;
 
     // router + response filling
-    router_t *router = new_router();
     handle_route(router, request, &response, request->uri);
 
     // sender
@@ -52,6 +54,7 @@ int main()
     struct sockaddr_in server_address;
     struct sockaddr_in client_address;
     socklen_t client_address_len = sizeof(client_address);
+    router_t *router = new_router();
 
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -105,13 +108,15 @@ int main()
         // (other alternatives are fork() and select())
 
         // malloc to get space because new_socketfd will become dangling in the next loop or compiler mallocs same space because of optimizing and race condition happens. (alternative is copy address and use it as void pointer)
-        int *new_clientfd = malloc(sizeof(int));
-        *new_clientfd = new_socketfd;
+
+        thread_dto_t *thread_dto = malloc(sizeof(thread_dto_t));
+        thread_dto->socketfd = new_socketfd;
+        thread_dto->router = router;
         pthread_t thread_id;
-        if (pthread_create(&thread_id, NULL, client_func, (void *)new_clientfd) < 0)
+        if (pthread_create(&thread_id, NULL, client_func, (void *)thread_dto) < 0)
         {
             perror("thread could not create");
-            free(new_clientfd);
+            free(thread_dto);
             close(new_socketfd);
             continue;
         }
