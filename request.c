@@ -3,6 +3,7 @@
 #include "request_header.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "query_string.h"
 
 request_t *parse_to_request(char *request_str)
 {
@@ -38,6 +39,32 @@ request_t *parse_to_request(char *request_str)
     printf("URI: %s\n", new_request->uri);
     printf("PROTOCOL VERSION: %s\n", new_request->protocol_version);
 
+    // extract query strings
+    int uri_index = 0;
+    int any_query_string = 1;
+    while (new_request->uri[uri_index] != '?')
+    {
+        if (new_request->uri[uri_index] == '\0')
+        {
+            any_query_string = 0;
+            break;
+        }
+        uri_index++;
+    }
+    if (any_query_string == 1)
+    {
+        new_request->uri[uri_index] = '\0'; // terminate uri before query string
+        char *query_string_str = &new_request->uri[uri_index + 1];
+        new_request->query_strings = extract_query_strings(query_string_str);
+    }
+    else
+    {
+        new_request->query_strings = new_arraylist(0);
+    }
+
+    printf("URI WITHOUT QUERY STRINGS: %s\n", new_request->uri);
+
+    // extract headers
     new_request->header_list = new_arraylist(4);
     for (int i = 1; i < lines->count - 1; i++)
     {
@@ -59,10 +86,11 @@ request_t *parse_to_request(char *request_str)
         }
         push(new_request->header_list, request_header);
 
-        printf("KEY%d: %s\n", i, request_header->key);
-        printf("VALUE%d: %s\n", i, request_header->value);
+        printf("HEADER KEY%d: %s\n", i - 1, request_header->key);
+        printf("HEADER VALUE%d: %s\n", i - 1, request_header->value);
     }
 
+    // extract body
     char *body_line = (char *)lines->data[lines->count - 1];
     new_request->body = body_line;
     printf("BODY: %s\n\n", new_request->body);
@@ -70,6 +98,45 @@ request_t *parse_to_request(char *request_str)
     // free lines but not data inside because they are still being used
     free(lines);
     return new_request;
+}
+
+arraylist_t *extract_query_strings(char *query_string_str)
+{
+    arraylist_t *query_strings = new_arraylist(2);
+    int query_index = 0;
+    query_string_t *current_query_string = malloc(sizeof(current_query_string));
+    current_query_string->key = &query_string_str[query_index];
+    while (query_string_str[query_index] != '\0')
+    {
+        if (query_string_str[query_index] == '=')
+        {
+            query_string_str[query_index] = '\0';
+            query_index++;
+            current_query_string->value = &query_string_str[query_index];
+        }
+        else if (query_string_str[query_index] == '&')
+        {
+            query_string_str[query_index] = '\0';
+
+            push(query_strings, current_query_string);
+
+            printf("QUERY STRING KEY%d: %s\n", query_strings->count - 1, current_query_string->key);
+            printf("QUERY STRING VALUE%d: %s\n", query_strings->count - 1, current_query_string->value);
+
+            current_query_string = malloc(sizeof(current_query_string));
+            query_index++;
+            current_query_string->key = &query_string_str[query_index];
+        }
+        else
+        {
+            query_index++;
+        }
+    }
+    push(query_strings, current_query_string);
+    printf("QUERY STRING KEY%d: %s\n", query_strings->count - 1, current_query_string->key);
+    printf("QUERY STRING VALUE%d: %s\n", query_strings->count - 1, current_query_string->value);
+
+    return query_strings;
 }
 
 arraylist_t *break_into_lines(char *request_str)
