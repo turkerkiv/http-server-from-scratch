@@ -4,7 +4,7 @@
 HTTP server that listens and accepts 1.1 version messages, parses them into request struct, gives it to router, finds match for provided URI and method in routes dispatch table, calls found route's handler function and gets response struct. When there is no match, returns 404. It can work asynchronously for multiple clients thanks to threads.
 
 ## Why i made it?
-I wanted to learn what is the happening under the hood of frameworks we use everyday. I was shocked that http relies on string parsing actually (well, at least for http1.1 version). I also wanted to improve my c skills. I split the project into 7 parts that goes from basic tcp connection in c and implementing arraylist to multiple threads and (completely optional) query string parsing. I progressively developed it step by step by searching each concepts. I do not use AI to write code when i am learning something new except for asking purposes, so all of it hand made. Here is the project.
+I wanted to learn what is the happening under the hood of frameworks we use everyday. I was shocked that http relies on string parsing actually (well, at least for http1.1 version). I also wanted to improve my c skills. I split the project into 7 parts that goes from basic tcp connection in c and implementing arraylist to multiple threads and (completely optional) query string parsing. I progressively developed it step by step by searching each concepts. I do not use AI to write code when i am learning something new except for asking purposes, so all of it hand made.
 
 ## Caveats?
 May v2 come to:
