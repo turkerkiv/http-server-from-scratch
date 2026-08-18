@@ -3,6 +3,8 @@
 
 arraylist_t *new_arraylist(int capacity)
 {
+    if (capacity <= 0)
+        capacity = 2;
     arraylist_t *arraylist = malloc(sizeof(arraylist_t));
     if (arraylist == NULL)
         return NULL;
