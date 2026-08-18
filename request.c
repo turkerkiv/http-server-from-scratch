@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "query_string.h"
+#include <string.h>
 
 request_t *parse_to_request(char *request_str)
 {
@@ -92,7 +93,19 @@ request_t *parse_to_request(char *request_str)
 
     // extract body
     char *body_line = (char *)lines->data[lines->count - 1];
+    request_header_t *content_length_header;
+    for (int i = 0; i < new_request->header_list->count; i++)
+    {
+        request_header_t *header = (request_header_t *)new_request->header_list->data[i];
+        if (strcmp(header->key, "Content-Length") == 0)
+        {
+            content_length_header = header;
+            break;
+        }
+    }
     new_request->body = body_line;
+    int length = atoi(content_length_header->value);
+    new_request->body[length] = '\0';
     printf("BODY: %s\n\n", new_request->body);
 
     // free lines but not data inside because they are still being used
