@@ -12,11 +12,22 @@ int main(void)
     int client_fd;
     struct sockaddr_in serv_addr;
 
-    char *request =
-        "GET /api/hello HTTP/1.1\r\n"
-        "Host: localhost:8080\r\n"
-        "Connection: keep-alive\r\n"
-        "\r\n";
+    // Curl isteğindeki JSON gövdesi (body)
+    char *json_body = "{\"key\": \"value\"}";
+    int body_length = strlen(json_body);
+
+    // HTTP POST İsteği Oluşturma
+    // Not: \r\n HTTP protokolü için zorunludur.
+    char request[2048];
+    snprintf(request, sizeof(request),
+             "POST /api/hello?param1=value1&param2=value2 HTTP/1.1\r\n"
+             "Host: localhost:8080\r\n"
+             "Content-Type: application/json\r\n"
+             "Content-Length: %d\r\n"
+             "Connection: close\r\n"
+             "\r\n"
+             "%s",
+             body_length, json_body);
 
     char buffer[4096] = {0};
 
@@ -50,11 +61,9 @@ int main(void)
 
     printf("Connected to server.\n");
 
-    printf("Connection will stay open for 30 seconds...\n");
-    sleep(20);
     send(client_fd, request, strlen(request), 0);
 
-    printf("Request sent:\n%s", request);
+    printf("Request sent:\n%s\n\n", request);
 
     int valread = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
@@ -65,7 +74,6 @@ int main(void)
     }
 
     printf("Closing connection.\n");
-
     close(client_fd);
 
     return 0;
