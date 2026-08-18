@@ -19,6 +19,7 @@ May v2 come to:
 - make more secure and bug free.
 - do refactor.
 - use makefile.
+- support HTTPS/TLS.
 
 ## Usage
 Make sure you have compiler installed to compile and link the codes.
@@ -78,5 +79,7 @@ To add route as you wish, go to `router.c`, add routes there and also prepare fu
 - /user GET
 - /users GET
 - /api/hello POST
+
 The controller folder contains handler functions of routes. You can put there as you create more routes.
+
 The static folder contains static files to serve.
