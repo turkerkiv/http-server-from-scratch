@@ -6,6 +6,7 @@
 
 request_t *parse_to_request(char *request_str)
 {
+    // the last line is body with curly braces
     arraylist_t *lines = break_into_lines(request_str);
 
     request_t *new_request = malloc(sizeof(request_t));
@@ -33,12 +34,12 @@ request_t *parse_to_request(char *request_str)
         request_line_index++;
     }
 
-    printf("%s\n", new_request->method);
-    printf("%s\n", new_request->uri);
-    printf("%s\n", new_request->protocol_version);
+    printf("METHOD: %s\n", new_request->method);
+    printf("URI: %s\n", new_request->uri);
+    printf("PROTOCOL VERSION: %s\n", new_request->protocol_version);
 
     new_request->header_list = new_arraylist(4);
-    for (int i = 1; i < lines->count; i++)
+    for (int i = 1; i < lines->count - 1; i++)
     {
         char *header_line = (char *)lines->data[i];
 
@@ -62,6 +63,10 @@ request_t *parse_to_request(char *request_str)
         printf("VALUE%d: %s\n", i, request_header->value);
     }
 
+    char *body_line = (char *)lines->data[lines->count - 1];
+    new_request->body = body_line;
+    printf("BODY: %s\n\n", new_request->body);
+
     // free lines but not data inside because they are still being used
     free(lines);
     return new_request;
@@ -70,22 +75,26 @@ request_t *parse_to_request(char *request_str)
 arraylist_t *break_into_lines(char *request_str)
 {
     arraylist_t *lines = new_arraylist(4);
-    int index = 0;
-    int line_char_reader_index = 0;
-    while (!(request_str[index - 2] == '\r' && request_str[index - 1] == '\n' && request_str[index] == '\r' && request_str[index + 1] == '\n'))
+    int global_index = 0;
+    while (!(request_str[global_index - 2] == '\r' && request_str[global_index - 1] == '\n' && request_str[global_index] == '\r' && request_str[global_index + 1] == '\n'))
     {
-        int inner = 0;
+        int line_index = 0;
         char *line = malloc(1024 * sizeof(char));
-        while (request_str[index] != '\r')
+        while (request_str[global_index] != '\r')
         {
-            line[inner] = request_str[index];
-            inner++;
-            index++;
+            line[line_index] = request_str[global_index];
+            line_index++;
+            global_index++;
         }
-        line[inner] = '\0';
-        line_char_reader_index++;
-        index += 2; // to skip \r\n
+        line[line_index] = '\0';
+        global_index += 2; // to skip \r\n
         push(lines, line);
     }
+
+    global_index += 2; // to skip \r\n\r\n
+    char *body = malloc(1024 * sizeof(char));
+    body = &request_str[global_index];
+    push(lines, body);
+
     return lines;
 }

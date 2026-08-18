@@ -4,6 +4,7 @@ typedef struct Request
     char *uri;
     char *protocol_version;
     arraylist_t *header_list;
+    char *body;
 } request_t;
 
 request_t *parse_to_request(char *request_str);

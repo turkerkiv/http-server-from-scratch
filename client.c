@@ -13,8 +13,8 @@ int main(void)
     struct sockaddr_in serv_addr;
 
     char *request =
-        "GET / HTTP/1.1\r\n"
-        "Host: localhost:8080/api/hello\r\n"
+        "GET /api/hello HTTP/1.1\r\n"
+        "Host: localhost:8080\r\n"
         "Connection: keep-alive\r\n"
         "\r\n";
 
