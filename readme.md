@@ -72,8 +72,11 @@ And output to terminal that we used curl looks like:
 {"message": "Hello from API!"}
 ```
 
+## Customize
 To add route as you wish, go to `router.c`, add routes there and also prepare function to handle that route. I added 4 routes to test:
 - / GET
 - /user GET
 - /users GET
 - /api/hello POST
+The controller folder contains handler functions of routes. You can put there as you create more routes.
+The static folder contains static files to serve.
