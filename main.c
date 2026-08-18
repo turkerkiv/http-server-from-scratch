@@ -44,6 +44,11 @@ void *client_func(void *thread_dto)
         free(request->header_list->data[i]);
     }
     free(request->header_list);
+    for (int i = 0; i < request->query_strings->count; i++)
+    {
+        free(request->query_strings->data[i]);
+    }
+    free(request->query_strings);
     free(request);
 
     close(client_fd);

@@ -137,7 +137,7 @@ arraylist_t *extract_query_strings(char *query_string_str)
             printf("QUERY STRING KEY%d: %s\n", query_strings->count - 1, current_query_string->key);
             printf("QUERY STRING VALUE%d: %s\n", query_strings->count - 1, current_query_string->value);
 
-            current_query_string = malloc(sizeof(current_query_string));
+            current_query_string = malloc(sizeof(query_string_t));
             query_index++;
             current_query_string->key = &query_string_str[query_index];
         }
