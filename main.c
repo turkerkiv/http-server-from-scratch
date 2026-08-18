@@ -31,7 +31,7 @@ void *client_func(void *thread_dto)
     response_t response;
 
     // router + response filling
-    handle_route(router, request, &response, request->uri);
+    handle_route(router, request, &response);
 
     // sender
     char result_str[4096];
@@ -123,14 +123,6 @@ int main()
 
         pthread_detach(thread_id);
     }
-
-    // when closing app but dont need to
-    // for (int i = 0; i < router->routes_dispatch_table->count; i++)
-    // {
-    //     free(router->routes_dispatch_table->data[i]);
-    // }
-    // free(router->routes_dispatch_table);
-    // free(router);
 
     close(sockfd);
     return 0;
